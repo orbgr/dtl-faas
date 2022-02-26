@@ -24,8 +24,11 @@ def main():
     package = project.packages.push(src_path=os.getcwd(), package_name=faas_name, modules=[module])
 
     # define artifact
-    # artifact_path = os.path.join('', '')
-    # package.artifacts.upload(filepath=artifact_path,
+    # dataset_main = project.datasets.get(dataset_name='Content_filter')
+    # item_classifier = dataset_main.items.get(filepath=f"/Models/nudenet_classifier.onnx")
+    # local_path = "./nudenet_classifier.onnx"
+    # _ = item_classifier.download(local_path=local_path)
+    # package.artifacts.upload(filepath=local_path,
     #                          package=package,
     #                          package_name=package.name)
 

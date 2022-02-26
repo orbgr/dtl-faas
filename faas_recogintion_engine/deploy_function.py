@@ -8,7 +8,7 @@ def main():
     dataset = project.datasets.get(dataset_name='DB_Customer')
     faas_name = "recognition-engine"
 
-    logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger("deploy function - rec engine")
     logger.setLevel(logging.INFO)
 
@@ -17,7 +17,7 @@ def main():
                               init_inputs=[],
                               functions=[dl.PackageFunction(name='run',
                                                             description='Merging all models output to an output',
-                                                            inputs=[dl.FunctionIO(name='output_dict', type=dl.PackageInputType.JSON)]
+                                                            inputs=[dl.FunctionIO(name='input', type=dl.PackageInputType.JSON)]
                                                             )])
 
     # define package

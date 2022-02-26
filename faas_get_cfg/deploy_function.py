@@ -10,7 +10,7 @@ def main():
     dataset = project.datasets.get(dataset_name='DB_Customer')
     faas_name = "get-config"
 
-    logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger("deploy function - get cfg")
     logger.setLevel(logging.INFO)
 
@@ -19,7 +19,7 @@ def main():
                               init_inputs=[],
                               functions=[dl.PackageFunction(name='run',
                                                             description='Running FaaS using Customer config',
-                                                            inputs=[dl.FunctionIO(name='input_img_item', type=dl.PackageInputType.ITEM)]
+                                                            inputs=[dl.FunctionIO(name='item_img', type=dl.PackageInputType.ITEM)]
                                                             )])
 
     # define package
@@ -50,10 +50,10 @@ def main():
     except:
         logger.error("problem uploading trigger")
 
-    logger.info("======================== TIME STARTED =======================")
-    time.sleep(5)
-    service.pause()
-    logger.info("======================== SERVICE PAUSED =======================")
+    # logger.info("======================== TIME STARTED =======================")
+    # time.sleep(5)
+    # service.pause()
+    # logger.info("======================== SERVICE PAUSED =======================")
 
 if __name__ == '__main__':
     dl.verbose.logging_level = dl.VERBOSE_LOGGING_LEVEL_WARNING

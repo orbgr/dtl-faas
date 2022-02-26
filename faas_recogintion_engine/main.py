@@ -5,7 +5,7 @@ import json
 import logging
 import time
 
-logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("deploy function - rec engine")
 logger.setLevel(logging.INFO)
 
@@ -15,24 +15,26 @@ class ServiceRunner:
         self.gmb_model_path = "path"
 
 
-    @staticmethod
-    def run(self, output_dict: dl.PackageInputType.JSON=None):
-        cfg = output_dict["cfg"]
-        input_img_item = output_dict["input_img_item"]
-        output_models = output_dict["output_models"]
+    # @staticmethod
+    def run(self, input: dl.PackageInputType.JSON=None):
+        input = json.loads(input)
+
+        cfg = input["cfg"]
+        item_id = input["item_id"]
+        output_models = input["output_models"]
 
         root = os.getcwd()
-        logger.info("[Yoav] starting recogintion engine run fucntion")
+        logger.info(f"starting recogintion engine run fucntion with input: cfg={cfg}, item_id={item_id}, output_models={output_models}")
 
 
         # get from cfg customer output type
-        if cfg["Models"]["output_type"] == "hide":
-            # build black box using output_dict["yolo_ants"]
-            # upload image to Output
-            return
-
-        if cfg["Models"]["output_type"] != "proba":
-            logger.info("enter incorrectly output type, will output probability as default behaivour")
+        # if cfg["Models"]["output_type"] in ["hide", "both"]:
+        #     # build black box using output_dict["yolo_ants"]
+        #     # upload image to Output
+        #     return
+        #
+        # if cfg["Models"]["output_type"] != "proba":
+        #     logger.info("enter incorrectly output type, will output probability as default behaivour")
 
         # predict with gmb model
         #         input_img_item.download(local_path='./image/')
