@@ -175,7 +175,7 @@ class ServiceRunner:
                 logger.info(f"Output for {faas_name}: {output}")
 
             except Exception as e:
-                logger.info("Output for {faas_name}: exe.get_latest_status()")
+                logger.info(f"Output for {faas_name}: {exe.get_latest_status()}")
                 logger.error(f"I'm here because of exception: {e}")
                 continue
 

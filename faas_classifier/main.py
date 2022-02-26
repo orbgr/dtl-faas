@@ -50,7 +50,7 @@ class ServiceRunner:
         logger.info(f"res of classifier {classifier_res_dict} with proba {prob_unsafe}")
 
         if input["upload"] == "1":
-            item_img = self.dataset.items.get(item_id=input["item_id"])
+            # todo: width & height are None :(
             logger.info(f"item_img width={item_img.width} height={item_img.height}")
             try:
                 label_define = dl.Box(left=item_img.width - 20,
