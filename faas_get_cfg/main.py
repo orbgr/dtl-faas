@@ -15,10 +15,16 @@ logger.setLevel(logging.INFO)
 # module main.py
 class ServiceRunner:
     def __init__(self):
-        self.faas_dict = { "1":["object-detection"],
-                           "2":["object-detection"], # , "pose-estimation"
-                           "3":["object-detection", "classifier"] # , "pose-estimation"
-                          }
+        self.faas_dict = { "1": ["object-detection"],
+                           "2": ["object-detection", "pose-estimator"],
+                           "3": ["object-detection", "pose-estimator", "classifier"]
+                         }
+
+        self.faas_name_to_func = {"object-detection": self._exe_object_detection,
+                                  "pose-estimator": self._exe_pose_est,
+                                  "classifier": self._exe_classifier,
+                                  "recognition-engine": self._exe_recognition_engine}
+
         self.project = dl.projects.get(project_name='Body Parts Detection')
         self.dataset = self.project.datasets.get(dataset_name='DB_Customer')
 
@@ -45,7 +51,28 @@ class ServiceRunner:
 
         return config
 
-    def _exe_object_detection(self, faas_name):
+
+    def _exe_pose_est(self):
+        faas_name = "pose-estimator"
+        input = dict(item_id=self.item.id,
+                     # upload = self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]]
+                    )
+
+
+        logger.info(f"item_id before faas {self.item.id}")
+
+        input = json.dumps(input, indent=4)
+
+        func_a = dl.FunctionIO(name='input',
+                               value=input,
+                               type=dl.PackageInputType.JSON)
+
+        execution = dl.services.get(service_name=faas_name)
+
+        return dict(execution=execution, execution_input=func_a, function_name="run")
+
+    def _exe_object_detection(self):
+        faas_name = "object-detection"
         input = dict(item_id=self.item.id,
                      cfg_labels=self.cfg._sections["Labels"],
                      upload=self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]])
@@ -63,7 +90,8 @@ class ServiceRunner:
 
         return dict(execution=execution, execution_input=func_a, function_name="detect")
 
-    def _exe_recognition_engine(self, faas_name):
+    def _exe_recognition_engine(self):
+        faas_name = "recognition-engine"
         input = dict(item_id=self.item.id,
                       cfg=self.cfg._sections,
                       output_models=self.recognition_engine_input)
@@ -80,7 +108,8 @@ class ServiceRunner:
 
         return dict(execution=execution, execution_input=func_a, function_name="run")
 
-    def _exe_classifier(self, faas_name):
+    def _exe_classifier(self):
+        faas_name = "recognition-engine"
         input = dict(item_id=self.item.id,
                           upload=self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]])
 
@@ -94,21 +123,6 @@ class ServiceRunner:
 
         execution = dl.services.get(service_name=faas_name)
         return dict(execution=execution, execution_input=func_a, function_name="run")
-
-    def _execute_faas(self, faas_name: dl.PackageInputType.JSON=None):
-        logger.info(f"FaaS GET_CFG before running : {faas_name}")
-
-        if faas_name == "object-detection":
-            return self._exe_object_detection(faas_name)
-
-        elif faas_name == "recognition-engine":
-            return self._exe_recognition_engine(faas_name)
-
-        elif faas_name == "classifier":
-            return self._exe_classifier(faas_name)
-
-        else:
-            logger.error(f"there's no faas name {faas_name}")
 
     def run(self, item_img: dl.Item=None):
 
@@ -148,7 +162,7 @@ class ServiceRunner:
         faas_to_exe = self.faas_dict[self.cfg["Models"]["accuracy"]]
         logger.info(f"FaaS to Execute list: {faas_to_exe}")
         for i, faas_name in enumerate(faas_to_exe):
-            execution_dict[faas_name] = self._execute_faas(faas_name)
+            execution_dict[faas_name] = self.faas_name_to_func[faas_name]()
 
         # execute
         for i, faas_name in enumerate(faas_to_exe):
@@ -180,4 +194,4 @@ class ServiceRunner:
                 continue
 
         self.recognition_engine_input = output_dict
-        self._execute_faas("recognition-engine")
+        self.faas_name_to_func["recognition-engine"]()
