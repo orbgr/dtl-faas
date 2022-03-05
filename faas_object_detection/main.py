@@ -23,7 +23,7 @@ def get_last_model_item(project_name='Body Parts Detection', dataset_name='Conte
     return model_names[f"M{max_iter}.pt"]
 
 logging.basicConfig(format='[YOAV] -  %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("deploy_function - Object Detection")
+logger = logging.getLogger("object Detection")
 logger.setLevel(logging.INFO)
 
 # todo: labels not hard coded, need to use M1 new recipe
