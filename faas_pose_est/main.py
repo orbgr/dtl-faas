@@ -61,7 +61,7 @@ class ServiceRunner:
         logger.info(f"platform={platform.platform()}")
         # os.environ['PATH'] += ':' + ""
         # subprocess.run("sudo apt - get install unrar")
-        subprocess.run("unzip openpose.zip")
+        # subprocess.run("unzip openpose.zip")
 
         Archive(full_path).extractall(self.openpose_path)
         # patoolib.extract_archive(full_path, outdir=self.openpose_path)
