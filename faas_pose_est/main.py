@@ -1,5 +1,7 @@
 import json
 import os
+import platform
+
 import dtlpy as dl
 import pandas as pd
 import glob
@@ -7,6 +9,7 @@ import logging
 import subprocess
 from os.path import join as join_path
 from pyunpack import Archive
+# import patoolib
 
 logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("pose estimation")
@@ -45,12 +48,24 @@ class ServiceRunner:
              25: "Background"
             }
 
-        dir_name = "openpose.rar"
-        self.openpose_path = join_path("..", "models", dir_name)
-        self.package.artifacts.download(artifact_name=dir_name,
-                                        local_path=self.openpose_path)
+        dir_name = r"openpose.rar"
+        self.openpose_path = join_path(os.getcwd())
+        full_path = join_path(self.openpose_path, dir_name)
 
-        Archive(self.openpose_path).extractall(join_path("..", "models"))
+        logger.info("download artifact start")
+        self.package.artifacts.download(artifact_name=dir_name,
+                                        local_path=full_path)
+        logger.info("download artifact finish")
+        logger.info(f'files in dir before extract {glob.glob(join_path(self.openpose_path, "*"))}')
+
+        logger.info(f"platform={platform.platform()}")
+        # os.environ['PATH'] += ':' + ""
+        # subprocess.run("sudo apt - get install unrar")
+        subprocess.run("unzip openpose.zip")
+
+        Archive(full_path).extractall(self.openpose_path)
+        # patoolib.extract_archive(full_path, outdir=self.openpose_path)
+        logger.info(f'files in dir after extract {glob.glob(join_path(self.openpose_path, "*"))}')
 
         self.openpose_path = join_path("..", "models", "openpose")
         self.project = dl.projects.get(project_name='Body Parts Detection')
