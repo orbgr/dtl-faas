@@ -1,3 +1,4 @@
+import glob
 import os
 import dtlpy as dl
 import json
@@ -6,6 +7,12 @@ from configparser import ConfigParser
 import time 
 import json
 from os.path import join as join_path
+from PIL import Image
+import numpy as np
+import pandas as pd
+import torch
+from torchvision import transforms
+from torchvision.utils import save_image
 
 logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("deploy function - get cfg")
@@ -58,9 +65,7 @@ class ServiceRunner:
                      # upload = self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]]
                     )
 
-
-        logger.info(f"item_id before faas {self.item.id}")
-
+        logger.info(f"item_id before faas _exe_pose_est: {self.item.id}")
         input = json.dumps(input, indent=4)
 
         func_a = dl.FunctionIO(name='input',
@@ -77,8 +82,7 @@ class ServiceRunner:
                      cfg_labels=self.cfg._sections["Labels"],
                      upload=self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]])
 
-        logger.info(f"item_id before faas {self.item.id}")
-        logger.info(f"cfg_labels before faas {self.cfg._sections['Labels']}")
+        logger.info(f"cfg_labels before faas for _exe_object_detection: {self.cfg._sections['Labels']}")
 
         input = json.dumps(input, indent=4)
 
@@ -93,9 +97,8 @@ class ServiceRunner:
     def _exe_recognition_engine(self):
         faas_name = "recognition-engine"
         input = dict(item_id=self.item.id,
-                      cfg=self.cfg._sections,
-                      output_models=self.recognition_engine_input)
-        logger.info(f"item_id before faas {self.item.id}")
+                     cfg=self.cfg._sections,
+                     output_models=self.recognition_engine_input)
 
         input = json.dumps(input, indent=4)
 
@@ -103,17 +106,16 @@ class ServiceRunner:
                                value=input,
                                type=dl.PackageInputType.JSON)
 
-
         execution = dl.services.get(service_name=faas_name)
 
         return dict(execution=execution, execution_input=func_a, function_name="run")
 
     def _exe_classifier(self):
-        faas_name = "recognition-engine"
+        faas_name = "classifier"
         input = dict(item_id=self.item.id,
-                          upload=self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]])
+                     upload=self.output_type_to_is_upload[self.cfg._sections["Models"]["output_type"]])
 
-        logger.info(f"item_id before faas {self.item.id}")
+        logger.info(f"item_id before faas _exe_classifier: {input}")
 
         input = json.dumps(input, indent=4)
 
@@ -189,9 +191,15 @@ class ServiceRunner:
                 logger.info(f"Output for {faas_name}: {output}")
 
             except Exception as e:
-                logger.info(f"Output for {faas_name}: {exe.get_latest_status()}")
+                logger.error(f"Output for {faas_name}: {exe.get_latest_status()}")
                 logger.error(f"I'm here because of exception: {e}")
                 continue
 
+
         self.recognition_engine_input = output_dict
-        self.faas_name_to_func["recognition-engine"]()
+
+        # run next faas, recognition-engine
+        exe_dict = self.faas_name_to_func["recognition-engine"]()
+        exe_dict["execution"].execute(execution_input=exe_dict["execution_input"],
+                                      function_name=exe_dict["function_name"],
+                                      project_id=self.project.id)

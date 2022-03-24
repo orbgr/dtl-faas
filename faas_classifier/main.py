@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 # module main.py
 class ServiceRunner:
     def __init__(self):
-        logger.info("start classifer...")
+        logger.info("start init classifer...")
         file_name = "nudenet_classifier.onnx"
         self.label = "IS_UNSAFE"
         self.package = dl.packages.get(package_name='classifier')
@@ -34,7 +34,7 @@ class ServiceRunner:
 
     # @staticmethod
     def run(self, input: dl.PackageInputType.JSON=None):
-        logger.info("start run...")
+        logger.info("start running clasiffier...")
 
         input = json.loads(input)
         logger.info(f"input {input}")
