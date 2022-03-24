@@ -1,14 +1,14 @@
 import json
 import os
 import platform
-import zipfile
+
 import dtlpy as dl
 import pandas as pd
 import glob
 import logging
 import subprocess
 from os.path import join as join_path
-# from pyunpack import Archive
+from pyunpack import Archive
 # import patoolib
 
 logging.basicConfig(format='[YOAV] - %(name)s - %(levelname)s - %(message)s')
@@ -48,28 +48,26 @@ class ServiceRunner:
              25: "Background"
             }
 
-        artifact_name = r"openpose.zip"
-        artifact_path = join_path(os.getcwd(), artifact_name)
+        dir_name = r"openpose.rar"
+        self.openpose_path = join_path(os.getcwd())
+        full_path = join_path(self.openpose_path, dir_name)
 
         logger.info("download artifact start")
-
-        self.package.artifacts.download(artifact_name=artifact_name,
-                                        local_path=artifact_path)
+        self.package.artifacts.download(artifact_name=dir_name,
+                                        local_path=full_path)
         logger.info("download artifact finish")
         logger.info(f'files in dir before extract {glob.glob(join_path(self.openpose_path, "*"))}')
 
-        # logger.info(f"platform={platform.platform()}")
+        logger.info(f"platform={platform.platform()}")
         # os.environ['PATH'] += ':' + ""
         # subprocess.run("sudo apt - get install unrar")
         # subprocess.run("unzip openpose.zip")
-        with zipfile.ZipFile(artifact_path, "r") as zip_ref:
-            zip_ref.extractall(os.getcwd())
-        # Archive(full_path).extractall(self.openpose_path)
+
+        Archive(full_path).extractall(self.openpose_path)
         # patoolib.extract_archive(full_path, outdir=self.openpose_path)
         logger.info(f'files in dir after extract {glob.glob(join_path(self.openpose_path, "*"))}')
 
-        # self.openpose_path = join_path("..", "models", "openpose")
-        self.openpose_path = join_path(os.getcwd(), "openpose")
+        self.openpose_path = join_path("..", "models", "openpose")
         self.project = dl.projects.get(project_name='Body Parts Detection')
         self.dataset = self.project.datasets.get(dataset_name='DB_Customer')
 
